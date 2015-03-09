@@ -1,2 +1,2 @@
 # iib
-IBM Integration Bus Projects
+IBM Integration Bus Projects @ scalait.com
