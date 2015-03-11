@@ -2,9 +2,20 @@ package br.com.tsuru.iib.admin.tools;
 
 import java.sql.Connection;
 
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemManager;
+import org.apache.commons.vfs2.FileSystemOptions;
+import org.apache.commons.vfs2.UserAuthenticator;
+import org.apache.commons.vfs2.VFS;
+import org.apache.commons.vfs2.auth.StaticUserAuthenticator;
+import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.ibm.broker.config.proxy.BrokerProxy;
 import com.ibm.broker.config.proxy.ConfigurableService;
 import com.ibm.broker.javacompute.MbJavaComputeNode;
+import com.ibm.broker.javastartparameters.JavaStartParameters;
 import com.ibm.broker.plugin.MbElement;
 import com.ibm.broker.plugin.MbException;
 import com.ibm.broker.plugin.MbJSON;
@@ -14,6 +25,8 @@ import com.ibm.broker.plugin.MbOutputTerminal;
 import com.ibm.broker.plugin.MbRecoverableException;
 
 public class ResourcesTestJCN extends MbJavaComputeNode {
+	
+	//private static Logger log = LogManager.getLogger(ResourcesTestJCN.class);
 
 	public void evaluate(MbMessageAssembly inAssembly) throws MbException {
 		MbOutputTerminal out = getOutputTerminal("out");
@@ -41,10 +54,13 @@ public class ResourcesTestJCN extends MbJavaComputeNode {
 				throw new IllegalArgumentException("resource name parameter (name) not found!");
 			}
 			BrokerProxy b = BrokerProxy.getLocalInstance();
+			while (!b.hasBeenPopulatedByBroker()) {
+				Thread.sleep(100);
+			}
 			ConfigurableService cs = b.getConfigurableService(type, name);
 			
 			if(cs == null) {
-				throw new IllegalArgumentException("resource not found!");
+				throw new IllegalArgumentException("resource not found! type: " + type + ",name: " + name);
 			}
 			
 			
@@ -57,10 +73,22 @@ public class ResourcesTestJCN extends MbJavaComputeNode {
 					data.createElementAsLastChild(MbElement.TYPE_NAME_VALUE,"rc",ex.getMessageKey());
 					data.createElementAsLastChild(MbElement.TYPE_NAME_VALUE,"msg",ex.getMessage());
 				}
-			} else if(type.equals("FTPServer")) {
+			} else if(type.equals("FtpServer")) {
 				//outAssembly.getLocalEnvironment().getRootElement().createElementAsLastChild(MbElement.TYPE_NAME,"Destination",null).createElementAsLastChild(MbElement.TYPE_NAME,"File",null).createElementAsLastChild(MbElement.TYPE_NAME,"Remote",null).createElementAsLastChild(MbElement.TYPE_NAME_VALUE,"Server",name);
+				String protocol = cs.getProperties().getProperty("protocol").toLowerCase();
+				String server = cs.getProperties().getProperty("serverName");
+				String authAlias = cs.getProperties().getProperty("securityIdentity");
+				String remoteDir = cs.getProperties().getProperty("remoteDirectory");
+				String[] creds = JavaStartParameters.getResourceUserAndPassword(protocol + "::", "", authAlias);
 				try {
-					
+					String startPath = protocol + "://" + server + remoteDir + "/file";
+					//log.debug("Connecting to: " + startPath + " with user: " + creds[0]);
+					FileSystemManager fsManager = VFS.getManager();
+					UserAuthenticator auth = new StaticUserAuthenticator(null, creds[0],creds[1]);
+			        FileSystemOptions opts = new FileSystemOptions();
+			        DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(opts, auth);
+					FileObject fo = fsManager.resolveFile(startPath, opts);
+
 					data.createElementAsLastChild(MbElement.TYPE_NAME_VALUE,"rc",0);
 					data.createElementAsLastChild(MbElement.TYPE_NAME_VALUE,"msg","Success!");
 				} catch(MbException mbe) {

@@ -49,10 +49,10 @@ public class ResourcesListJCN extends MbJavaComputeNode {
 				MbElement typeOut = outArray.createElementAsLastChild(MbElement.TYPE_NAME, MbJSON.ARRAY_ITEM_NAME, null);
 				typeOut.createElementAsLastChild(MbElement.TYPE_NAME_VALUE, "type", type);
 				MbElement resArray = typeOut.createElementAsLastChild(	MbJSON.ARRAY, "resource", null);
-				for (ConfigurableService ds : resources) {
+				for (ConfigurableService cs : resources) {
 					MbElement dsOut = resArray.createElementAsLastChild(MbElement.TYPE_NAME, MbJSON.ARRAY_ITEM_NAME, null);
-					dsOut.createElementAsLastChild(MbElement.TYPE_NAME_VALUE,"name", ds.getName());
-					Properties props = ds.getProperties();
+					dsOut.createElementAsLastChild(MbElement.TYPE_NAME_VALUE,"name", cs.getName());
+					Properties props = cs.getProperties();
 					for (Object key : props.keySet()) {
 						dsOut.createElementAsLastChild(MbElement.TYPE_NAME_VALUE, key.toString(),props.get(key));
 					}
