@@ -22,7 +22,7 @@
 						<div class="col-md-8">
 						<h1>Resource URL</h1>
 						<div class="col-md-6">
-						http://localhost:7080/iib/admin/tools/jdbctester
+						http://server/iib/admin/tools/resources/*
 						</div>
 						</div>
 					</div>
