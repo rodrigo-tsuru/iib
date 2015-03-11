@@ -15,6 +15,8 @@ import com.ibm.broker.plugin.MbUserException;
 import com.ibm.broker.plugin.MbXMLNSC;
 
 public class JDBCTester_List extends MbJavaComputeNode {
+	
+	public static final String[] RESOURCE_TYPES = {"JDBCProviders","EmailServer","FtpServer"}; 
 
 	public void evaluate(MbMessageAssembly inAssembly) throws MbException {
 		MbOutputTerminal out = getOutputTerminal("out");

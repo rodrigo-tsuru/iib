@@ -6,5 +6,6 @@
 	<classpathentry kind="var" path="JCN_HOME/jplugin2.jar"/>
 	<classpathentry kind="lib" path="/opt/ibm/mqsi/9.0.0.2/classes/ConfigManagerProxy.jar"/>
 	<classpathentry kind="con" path="com.ibm.etools.mft.uri.classpath.MBProjectReference"/>
+	<classpathentry kind="lib" path="/opt/ibm/mqsi/9.0.0.2/classes/jplugininternal.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
