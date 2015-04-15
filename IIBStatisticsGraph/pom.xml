@@ -59,4 +59,24 @@
 			<url>http://nexus-tsuru.rhcloud.com/nexus/content/repositories/tsuru/</url>
 		</repository>
 	</repositories>
+	<build>
+	<plugins>
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>jaxb2-maven-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>xjc</id>
+                    <goals>
+                        <goal>xjc</goal>
+                    </goals>
+                </execution>
+            </executions>
+            <configuration>
+            	<schemaDirectory>${basedir}/src/main/resources</schemaDirectory>
+                <packageName>com.ibm.stats</packageName>
+            </configuration>
+        </plugin>
+    </plugins>
+	</build>
 </project>

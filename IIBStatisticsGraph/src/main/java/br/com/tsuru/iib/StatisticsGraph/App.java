@@ -6,19 +6,12 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Map;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.ibm.mq.MQEnvironment;
 import com.ibm.mq.MQException;
@@ -27,14 +20,27 @@ import com.ibm.mq.MQMessage;
 import com.ibm.mq.MQQueue;
 import com.ibm.mq.MQQueueManager;
 import com.ibm.mq.constants.CMQC;
+import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.headers.MQDataException;
 import com.ibm.mq.headers.MQHeaderIterator;
+import com.ibm.stats.WMQIStatisticsAccounting;
 
 /**
  * Hello world!
  * 
  */
 public class App {
+	private static JAXBContext jc; 
+	private static Unmarshaller u;
+	static {
+		try {
+			jc = JAXBContext.newInstance( "com.ibm.stats" );
+			u = jc.createUnmarshaller();
+		} catch (JAXBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	public static void main(String[] args) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-ddHH:mm:ss.SSSSSS");
 		MQEnvironment.disableTracing();
@@ -53,14 +59,6 @@ public class App {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder builder = null;
-		try {
-			builder = factory.newDocumentBuilder();
-		} catch (ParserConfigurationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
 
 		boolean hasMessages = true;
 		while (hasMessages) {
@@ -73,46 +71,37 @@ public class App {
 				it.skipHeaders();
 				byte[] content = new byte[message.getDataLength()];
 				message.readFully(content);
-				System.out.println(new String(content));
-				System.exit(1);
-				Document doc = builder.parse(new ByteArrayInputStream(content));
-				Element messageFlow = (Element) doc.getDocumentElement().getFirstChild();
-				String egName = messageFlow.getAttribute("ExecutionGroupName");
-				String flowName = messageFlow.getAttribute("MessageFlowName");
-				String qtd = messageFlow.getAttribute("TotalInputMessages");
-				double elapsedMicroseconds = Double.valueOf(messageFlow
-						.getAttribute("TotalElapsedTime"));
-				double elapsedSeconds = elapsedMicroseconds / 1000000.0; // TotalElapsedTime
+				
+				WMQIStatisticsAccounting stat = (WMQIStatisticsAccounting) u.unmarshal(new ByteArrayInputStream(content));
+				double elapsedSeconds = stat.getMessageFlow().getTotalElapsedTime() / 1000000.0; // TotalElapsedTime
 																			// is
 																			// in
 																			// microseconds
 				double tps = 0;
 
-				if (Integer.valueOf(qtd) > 0) {
-					System.out.println(qtd);
-					tps = Integer.valueOf(qtd) / elapsedSeconds;
-					String time = messageFlow.getAttribute("StartDate")
-							+ messageFlow.getAttribute("StartTime");
-					Date eventDate = sdf.parse(time);
-					sendMetrics(flowName, tps, eventDate.getTime());
-					System.out.println("Transaction per second: " + tps);
+				if (stat.getMessageFlow().getTotalInputMessages() > 0) {
+					tps = stat.getMessageFlow().getTotalInputMessages() / elapsedSeconds;
+					
+					XMLGregorianCalendar eventDate = stat.getMessageFlow().getStartDate();
+					XMLGregorianCalendar eventTime = stat.getMessageFlow().getStartTime();
+					eventDate.setHour(eventTime.getHour());
+					eventDate.setMinute(eventTime.getMinute());
+					eventDate.setSecond(eventTime.getSecond());
+					sendMetrics(stat.getMessageFlow().getMessageFlowName(), tps, eventDate.toGregorianCalendar().getTimeInMillis());
 				}
 
 			} catch (MQException e) {
-				if (e.reasonCode == 2033) {
-					System.out.println("Nenhuma mensagem encontrada!");
+				if (e.reasonCode == MQConstants.MQRC_NO_MSG_AVAILABLE) {
+					System.out.println("No more messages available!");
 					hasMessages = false;
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} catch (SAXException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			} catch (MQDataException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JAXBException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
