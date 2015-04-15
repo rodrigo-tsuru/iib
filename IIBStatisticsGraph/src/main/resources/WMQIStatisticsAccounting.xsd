@@ -2,85 +2,100 @@
 	elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 	<xs:element name="WMQIStatisticsAccounting">
 		<xs:annotation>
-			<xs:documentation>http://www-01.ibm.com/support/knowledgecenter/SSMKHH_9.0.0/com.ibm.etools.mft.doc/ac19020_.htm
-			</xs:documentation>
+			<xs:documentation>http://www-01.ibm.com/support/knowledgecenter/SSMKHH_9.0.0/com.ibm.etools.mft.doc/ac19020_.htm</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element name="MessageFlow">
 					<xs:complexType>
-						<xs:simpleContent>
-							<xs:extension base="xs:string">
-								<xs:attribute type="_String32" name="BrokerLabel" />
-								<xs:attribute type="_String32" name="BrokerUUID" />
-								<xs:attribute type="_String32" name="ExecutionGroupName" />
-								<xs:attribute type="_String32" name="ExecutionGroupUUID" />
-								<xs:attribute type="_String32" name="MessageFlowName" />
-								<xs:attribute type="xs:string" name="ApplicationName" use="optional"/>
-								<xs:attribute type="xs:date" name="StartDate" />
-								<xs:attribute type="_ExtendedTime" name="StartTime" />
-								<xs:attribute type="xs:date" name="EndDate" />
-								<xs:attribute type="_ExtendedTime" name="EndTime" />
-								<xs:attribute type="xs:long" name="TotalElapsedTime" />
-								<xs:attribute type="xs:long" name="MaximumElapsedTime" />
-								<xs:attribute type="xs:long" name="MinimumElapsedTime" />
-								<xs:attribute type="xs:long" name="TotalCPUTime" />
-								<xs:attribute type="xs:long" name="MaximumCPUTime" />
-								<xs:attribute type="xs:long" name="MinimumCPUTime" />
-								<xs:attribute type="xs:long" name="CPUTimeWaitingForInputMessage" />
-								<xs:attribute type="xs:long" name="ElapsedTimeWaitingForInputMessage" />
-								<xs:attribute type="xs:long" name="TotalInputMessages" />
-								<xs:attribute type="xs:long" name="TotalSizeOfInputMessages" />
-								<xs:attribute type="xs:long" name="MaximumSizeOfInputMessages" />
-								<xs:attribute type="xs:long" name="MinimumSizeOfInputMessages" />
-								<xs:attribute type="xs:long" name="NumberOfThreadsInPool" />
-								<xs:attribute type="xs:long"name="TimesMaximumNumberOfThreadsReached" />
-								<xs:attribute type="xs:long" name="TotalNumberOfMQErrors" />
-								<xs:attribute type="xs:long" name="TotalNumberOfMessagesWithErrors" />
-								<xs:attribute type="xs:long" name="TotalNumberOfErrorsProcessingMessages" />
-								<xs:attribute type="xs:long" name="TotalNumberOfTimeOutsWaitingForRepliesToAggregateMessages" />
-								<xs:attribute type="xs:long" name="TotalNumberOfCommits" />
-								<xs:attribute type="xs:long" name="TotalNumberOfBackouts" />
-								<xs:attribute type="xs:string" name="AccountingOrigin" />
-							</xs:extension>
-						</xs:simpleContent>
+							<xs:attribute type="_String32" name="BrokerLabel" />
+							<xs:attribute type="_UUID" name="BrokerUUID" />
+							<xs:attribute type="_String32" name="ExecutionGroupName" />
+							<xs:attribute type="_UUID" name="ExecutionGroupUUID" />
+							<xs:attribute type="_String32" name="MessageFlowName" />
+							<xs:attribute type="xs:string" name="ApplicationName" use="optional"/>
+							<xs:attribute type="xs:date" name="StartDate" />
+							<xs:attribute type="xs:time" name="StartTime" />
+							<xs:attribute type="xs:date" name="EndDate" />
+							<xs:attribute type="xs:time" name="EndTime" />
+							<xs:attribute type="xs:long" name="TotalElapsedTime" />
+							<xs:attribute type="xs:long" name="MaximumElapsedTime" />
+							<xs:attribute type="xs:long" name="MinimumElapsedTime" />
+							<xs:attribute type="xs:long" name="TotalCPUTime" />
+							<xs:attribute type="xs:long" name="MaximumCPUTime" />
+							<xs:attribute type="xs:long" name="MinimumCPUTime" />
+							<xs:attribute type="xs:long" name="CPUTimeWaitingForInputMessage" />
+							<xs:attribute type="xs:long" name="ElapsedTimeWaitingForInputMessage" />
+							<xs:attribute type="xs:long" name="TotalInputMessages" />
+							<xs:attribute type="xs:long" name="TotalSizeOfInputMessages" />
+							<xs:attribute type="xs:long" name="MaximumSizeOfInputMessages" />
+							<xs:attribute type="xs:long" name="MinimumSizeOfInputMessages" />
+							<xs:attribute type="xs:long" name="NumberOfThreadsInPool" />
+							<xs:attribute type="xs:long" name="TimesMaximumNumberOfThreadsReached" />
+							<xs:attribute type="xs:long" name="TotalNumberOfMQErrors" />
+							<xs:attribute type="xs:long" name="TotalNumberOfMessagesWithErrors" />
+							<xs:attribute type="xs:long" name="TotalNumberOfErrorsProcessingMessages" />
+							<xs:attribute type="xs:long" name="TotalNumberOfTimeOutsWaitingForRepliesToAggregateMessages" />
+							<xs:attribute type="xs:long" name="TotalNumberOfCommits" />
+							<xs:attribute type="xs:long" name="TotalNumberOfBackouts" />
+							<xs:attribute type="xs:string" name="AccountingOrigin" />
 					</xs:complexType>
 				</xs:element>
 				<xs:element name="Threads">
-					<xs:complexType>
-						<xs:simpleContent>
-							<xs:extension base="xs:string">
-								<xs:attribute type="xs:long" name="Number" />
-							</xs:extension>
-						</xs:simpleContent>
-					</xs:complexType>
-				</xs:element>
-				<xs:element name="Nodes">
-					<xs:complexType>
-						<xs:sequence>
-							<xs:element name="NodeStatistics" maxOccurs="unbounded"	minOccurs="0">
-								<xs:complexType>
-									<xs:simpleContent>
-										<xs:extension base="xs:string">
-											<xs:attribute type="xs:string" name="Label" use="optional" />
-											<xs:attribute type="xs:string" name="Type" use="optional" />
-											<xs:attribute type="xs:long" name="TotalElapsedTime" use="optional" />
-											<xs:attribute type="xs:long" name="MaximumElapsedTime" use="optional" />
-											<xs:attribute type="xs:long" name="MinimumElapsedTime" use="optional" />
-											<xs:attribute type="xs:long" name="TotalCPUTime" use="optional" />
-											<xs:attribute type="xs:long" name="MaximumCPUTime" use="optional" />
-											<xs:attribute type="xs:long" name="MinimumCPUTime" use="optional" />
-											<xs:attribute type="xs:long" name="CountOfInvocations" use="optional" />
-											<xs:attribute type="xs:long" name="NumberOfInputTerminals" use="optional" />
-											<xs:attribute type="xs:long" name="NumberOfOutputTerminals" use="optional" />
-										</xs:extension>
-									</xs:simpleContent>
-								</xs:complexType>
-							</xs:element>
-						</xs:sequence>
-						<xs:attribute type="xs:long" name="Number" />
-					</xs:complexType>
-				</xs:element>
+	          <xs:complexType>
+	            <xs:sequence>
+	              <xs:element name="ThreadStatistics">
+	                <xs:complexType>
+	                  <xs:simpleContent>
+	                    <xs:extension base="xs:string">
+	                      <xs:attribute type="xs:int" name="Number"/>
+	                      <xs:attribute type="xs:long" name="TotalNumberOfInputMessages"/>
+	                      <xs:attribute type="xs:long" name="TotalElapsedTime"/>
+	                      <xs:attribute type="xs:long" name="TotalCPUTime"/>
+	                      <xs:attribute type="xs:long" name="CPUTimeWaitingForInputMessage"/>
+	                      <xs:attribute type="xs:long" name="ElapsedTimeWaitingForInputMessage"/>
+	                      <xs:attribute type="xs:long" name="TotalSizeOfInputMessages"/>
+	                      <xs:attribute type="xs:long" name="MaximumSizeOfInputMessages"/>
+	                      <xs:attribute type="xs:long" name="MinimumSizeOfInputMessages"/>
+	                    </xs:extension>
+	                  </xs:simpleContent>
+	                </xs:complexType>
+	              </xs:element>
+	            </xs:sequence>
+	            <xs:attribute type="xs:int" name="Number"/>
+	          </xs:complexType>
+        </xs:element>
+		<xs:element name="Nodes">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="NodeStatistics" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="TerminalStatistics" maxOccurs="unbounded" minOccurs="0">
+                      <xs:complexType>
+                            <xs:attribute type="xs:string" name="Label"/>
+                            <xs:attribute type="xs:string" name="Type"/>
+                            <xs:attribute type="xs:long" name="CountOfInvocations"/>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute type="xs:string" name="Label" use="optional"/>
+                  <xs:attribute type="xs:string" name="Type" use="optional"/>
+                  <xs:attribute type="xs:long" name="TotalElapsedTime" use="optional"/>
+                  <xs:attribute type="xs:long" name="MaximumElapsedTime" use="optional"/>
+                  <xs:attribute type="xs:long" name="MinimumElapsedTime" use="optional"/>
+                  <xs:attribute type="xs:long" name="TotalCPUTime" use="optional"/>
+                  <xs:attribute type="xs:long" name="MaximumCPUTime" use="optional"/>
+                  <xs:attribute type="xs:long" name="MinimumCPUTime" use="optional"/>
+                  <xs:attribute type="xs:long" name="CountOfInvocations" use="optional"/>
+                  <xs:attribute type="xs:long" name="NumberOfInputTerminals" use="optional"/>
+                  <xs:attribute type="xs:long" name="NumberOfOutputTerminals" use="optional"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute type="xs:int" name="Number"/>
+          </xs:complexType>
+        </xs:element>
 			</xs:sequence>
 			<xs:attribute type="_RecordType" name="RecordType" />
 			<xs:attribute type="_RecordCode" name="RecordCode" />
@@ -89,7 +104,7 @@
 	<xs:simpleType name="_RecordType">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="Archive"></xs:enumeration>
-			<xs:enumeration value="Snapshot"></xs:enumeration>
+			<xs:enumeration value="SnapShot"></xs:enumeration>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="_RecordCode">
@@ -106,10 +121,10 @@
 			<xs:maxLength value="32"></xs:maxLength>
 		</xs:restriction>
 	</xs:simpleType>
-	<xs:simpleType name="_ExtendedTime">
-		<xs:restriction base="xs:time">
-			<xs:pattern>HH:mm:ss.SSSSSS</xs:pattern>
+	<xs:simpleType name="_UUID">
+		<xs:annotation><xs:documentation>got from https://standards.ieee.org/downloads/1671/1671-2010/Common.xsd</xs:documentation></xs:annotation>
+		<xs:restriction base="xs:string">
+		<xs:pattern value="[A-Fa-f0-9]{32}|(\{|\()?[A-Fa-f0-9]{8}-([A-Fa-f0-9]{4}-){3}[A-Fa-f0-9]{12}(\}|\))?"/>
 		</xs:restriction>
 	</xs:simpleType>
-
 </xs:schema>

@@ -1,0 +1,79 @@
+<WMQIStatisticsAccounting RecordType="SnapShot"
+	RecordCode="Snapshot">
+
+	<MessageFlow BrokerLabel="MQ02BRK"
+		BrokerUUID="7d951e31-f200-0000-0080-efe1b9d849dc" ExecutionGroupName="default"
+		ExecutionGroupUUID="77cf1e31-f200-0000-0080-efe1b9d849dc"
+		MessageFlowName="XMLflow" StartDate="2003-01-17" StartTime="14:44:34.581320"
+		EndDate="2003-01-17" EndTime="14:44:44.582926" TotalElapsedTime="0"
+		MaximumElapsedTime="0" MinimumElapsedTime="0" TotalCPUTime="0"
+		MaximumCPUTime="0" MinimumCPUTime="0" CPUTimeWaitingForInputMessage="685"
+		ElapsedTimeWaitingForInputMessage="10001425" TotalInputMessages="0"
+		TotalSizeOfInputMessages="0" MaximumSizeOfInputMessages="0"
+		MinimumSizeOfInputMessages="0" NumberOfThreadsInPool="1"
+		TimesMaximumNumberOfThreadsReached="0" TotalNumberOfMQErrors="0"
+		TotalNumberOfMessagesWithErrors="0"
+		TotalNumberOfErrorsProcessingMessages="0"
+		TotalNumberOfTimeOutsWaitingForRepliesToAggregateMessages="0"
+		TotalNumberOfCommits="0" TotalNumberOfBackouts="0" AccountingOrigin="DEPT1" />
+
+
+	<Threads Number="1">
+		<ThreadStatistics Number="5"
+			TotalNumberOfInputMessages="0" TotalElapsedTime="0" TotalCPUTime="0"
+			CPUTimeWaitingForInputMessage="685"
+			ElapsedTimeWaitingForInputMessage="10001425"
+			TotalSizeOfInputMessages="0" MaximumSizeOfInputMessages="0"
+			MinimumSizeOfInputMessages="0" />
+	</Threads>
+
+
+	<Nodes Number="3">
+
+
+		<NodeStatistics Label="FAILQueue" Type="MQOutput"
+			TotalElapsedTime="0" MaximumElapsedTime="0" MinimumElapsedTime="0"
+			TotalCPUTime="0" MaximumCPUTime="0" MinimumCPUTime="0"
+			CountOfInvocations="0" NumberOfInputTerminals="1"
+			NumberOfOutputTerminals="2">
+			<TerminalStatistics Label="failure" Type="Output"
+				CountOfInvocations="0" />
+			<TerminalStatistics Label="in" Type="Input"
+				CountOfInvocations="0" />
+			<TerminalStatistics Label="out" Type="Output"
+				CountOfInvocations="0" />
+		</NodeStatistics>
+
+
+		<NodeStatistics Label="INQueue3" Type="MQInput"
+			TotalElapsedTime="0" MaximumElapsedTime="0" MinimumElapsedTime="0"
+			TotalCPUTime="0" MaximumCPUTime="0" MinimumCPUTime="0"
+			CountOfInvocations="0" NumberOfInputTerminals="0"
+			NumberOfOutputTerminals="3">
+			<TerminalStatistics Label="catch" Type="Output"
+				CountOfInvocations="0" />
+			<TerminalStatistics Label="failure" Type="Output"
+				CountOfInvocations="0" />
+			<TerminalStatistics Label="out" Type="Output"
+				CountOfInvocations="0" />
+		</NodeStatistics>
+
+
+		<NodeStatistics Label="OUTQueue" Type="MQOutput"
+			TotalElapsedTime="0" MaximumElapsedTime="0" MinimumElapsedTime="0"
+			TotalCPUTime="0" MaximumCPUTime="0" MinimumCPUTime="0"
+			CountOfInvocations="0" NumberOfInputTerminals="1"
+			NumberOfOutputTerminals="2">
+			<TerminalStatistics Label="failure" Type="Output"
+				CountOfInvocations="0" />
+			<TerminalStatistics Label="in" Type="Input"
+				CountOfInvocations="0" />
+			<TerminalStatistics Label="out" Type="Output"
+				CountOfInvocations="0" />
+		</NodeStatistics>
+
+
+	</Nodes>
+
+
+</WMQIStatisticsAccounting>
