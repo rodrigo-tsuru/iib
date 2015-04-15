@@ -14,7 +14,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import com.ibm.mq.MQC;
 import com.ibm.mq.MQEnvironment;
 import com.ibm.mq.MQException;
 import com.ibm.mq.MQGetMessageOptions;
@@ -22,6 +21,8 @@ import com.ibm.mq.MQMessage;
 import com.ibm.mq.MQQueue;
 import com.ibm.mq.MQQueueManager;
 import com.ibm.mq.constants.CMQC;
+import com.ibm.mq.headers.MQDataException;
+import com.ibm.mq.headers.MQHeaderIterator;
 
 /**
  * Hello world!
@@ -35,15 +36,14 @@ public class App
 		MQEnvironment.disableTracing();
 		MQQueueManager qmgr = null;
 		MQQueue q = null;
-		MQMessage message;
+		MQMessage message = new MQMessage();
+		MQGetMessageOptions gmo = new MQGetMessageOptions();
 		try {
 			qmgr = new MQQueueManager("IB9NODE");
-			int openOptions = CMQC.MQOO_INQUIRE
-					+ CMQC.MQOO_FAIL_IF_QUIESCING + CMQC.MQOO_INPUT_SHARED;
+			int openOptions = CMQC.MQOO_BROWSE;
 			q = qmgr.accessQueue("ESTATISTICAS", openOptions);
 			
-			MQGetMessageOptions gmo = new MQGetMessageOptions();
-			gmo.options = MQC.MQGMO_WAIT;
+			gmo.options = CMQC.MQGMO_BROWSE_NEXT;
 			gmo.waitInterval = 5000;
 		} catch (MQException e1) {
 			// TODO Auto-generated catch block
@@ -53,11 +53,14 @@ public class App
 		boolean hasMessages = true;
 		while (hasMessages) {
 			try {
-				message = new MQMessage();
-				q.get(message);
+				message.clearMessage();
+				message.correlationId = CMQC.MQCI_NONE;
+	            message.messageId     = CMQC.MQMI_NONE;
+				q.get(message,gmo);
+				MQHeaderIterator it = new MQHeaderIterator (message);
+				it.skipHeaders ();
 				byte[] content = new byte[message.getDataLength()];
 				message.readFully(content);
-				System.out.println(new String(content));
 				DocumentBuilderFactory factory = DocumentBuilderFactory
 						.newInstance();
 				DocumentBuilder builder = factory.newDocumentBuilder();
@@ -78,7 +81,6 @@ public class App
 					String time = messageFlow.getAttribute("StartDate")	+ messageFlow.getAttribute("StartTime");
 					Date eventDate = sdf.parse(time);
 				}
-
 				System.out.println("Transaction per second: " + tps);
 
 			} catch (MQException e) {
@@ -96,6 +98,9 @@ public class App
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (MQDataException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
