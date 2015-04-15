@@ -45,11 +45,58 @@
 			<groupId>com.ibm.mq</groupId>
 			<artifactId>com.ibm.mq.headers.jar</artifactId>
 			<version>7.5.0.3</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.ibm.mq</groupId>
 			<artifactId>com.ibm.mq.pcf.jar</artifactId>
 			<version>7.5.0.3</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.jms</groupId>
+			<artifactId>javax.jms-api</artifactId>
+			<version>2.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.ibm.mq</groupId>
+			<artifactId>mqcontext.jar</artifactId>
+			<version>1.0</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.ibm.mq</groupId>
+			<artifactId>com.ibm.mqjms.jar</artifactId>
+			<version>7.5.0.3</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.ibm.mq</groupId>
+			<artifactId>dhbcore.jar</artifactId>
+			<version>7.5.0.3</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.jndi</groupId>
+			<artifactId>fscontext.jar</artifactId>
+			<version>1.0</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.jndi</groupId>
+			<artifactId>providerutil.jar</artifactId>
+			<version>1.0</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.2</version>
 		</dependency>
 	</dependencies>
 	<repositories>
@@ -60,23 +107,23 @@
 		</repository>
 	</repositories>
 	<build>
-	<plugins>
-        <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>jaxb2-maven-plugin</artifactId>
-            <executions>
-                <execution>
-                    <id>xjc</id>
-                    <goals>
-                        <goal>xjc</goal>
-                    </goals>
-                </execution>
-            </executions>
-            <configuration>
-            	<schemaDirectory>${basedir}/src/main/resources</schemaDirectory>
-                <packageName>com.ibm.stats</packageName>
-            </configuration>
-        </plugin>
-    </plugins>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>jaxb2-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>xjc</id>
+						<goals>
+							<goal>xjc</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<schemaDirectory>${basedir}/src/main/resources</schemaDirectory>
+					<packageName>com.ibm.stats</packageName>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 </project>

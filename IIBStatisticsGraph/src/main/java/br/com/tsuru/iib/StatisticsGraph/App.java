@@ -1,133 +1,111 @@
 package br.com.tsuru.iib.StatisticsGraph;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.text.SimpleDateFormat;
+import java.util.Hashtable;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.datatype.XMLGregorianCalendar;
+import javax.jms.ConnectionConsumer;
+import javax.jms.JMSException;
+import javax.jms.Topic;
+import javax.jms.TopicConnection;
+import javax.jms.TopicConnectionFactory;
+import javax.jms.TopicSession;
+import javax.naming.Context;
+import javax.naming.directory.InitialDirContext;
 
-import com.ibm.mq.MQEnvironment;
-import com.ibm.mq.MQException;
-import com.ibm.mq.MQGetMessageOptions;
-import com.ibm.mq.MQMessage;
-import com.ibm.mq.MQQueue;
-import com.ibm.mq.MQQueueManager;
-import com.ibm.mq.constants.CMQC;
-import com.ibm.mq.constants.MQConstants;
-import com.ibm.mq.headers.MQDataException;
-import com.ibm.mq.headers.MQHeaderIterator;
-import com.ibm.stats.WMQIStatisticsAccounting;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Hello world!
  * 
  */
 public class App {
-	private static JAXBContext jc; 
-	private static Unmarshaller u;
-	static {
-		try {
-			jc = JAXBContext.newInstance( "com.ibm.stats" );
-			u = jc.createUnmarshaller();
-		} catch (JAXBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+
+	private static Logger log = LogManager.getLogger(App.class);
+	//public final static String DEFAULT_CONTEXT_FACTORY = "com.ibm.mq.jms.context.WMQInitialContextFactory"; // deprecated ME01
+	//public final static String DEFAULT_CONTEXT_FACTORY = "com.ibm.mq.jms.Nojndi"; // supports queues only
+	public final static String DEFAULT_CONTEXT_FACTORY = "com.sun.jndi.fscontext.RefFSContextFactory"; // filesystem JNDI implementation
+	
+	
 	public static void main(String[] args) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-ddHH:mm:ss.SSSSSS");
-		MQEnvironment.disableTracing();
-		MQQueueManager qmgr = null;
-		MQQueue q = null;
-		MQMessage message = new MQMessage();
-		MQGetMessageOptions gmo = new MQGetMessageOptions();
-		try {
-			qmgr = new MQQueueManager("IB9NODE");
-			int openOptions = CMQC.MQOO_BROWSE;
-			q = qmgr.accessQueue("ESTATISTICAS", openOptions);
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {
+				System.out.println("Shutdown Hook is running !");
+			}
+		});
+		TopicConnectionFactory factory = null;
+		TopicConnection connection = null;
+		TopicSession session = null;
+		Topic topic = null;
 
-			gmo.options = CMQC.MQGMO_BROWSE_NEXT;
-			gmo.waitInterval = 5000;
-		} catch (MQException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		Context ctx = null;
+		
+		Hashtable environment = new Hashtable();
+		environment.put(Context.INITIAL_CONTEXT_FACTORY,
+				App.DEFAULT_CONTEXT_FACTORY);
+		environment.put(Context.PROVIDER_URL,"file:/tmp/");
+		try {
+			log.info("Getting the context factory.");
+			ctx = new InitialDirContext(environment);
+		} catch (Exception e) {
+			log.error("Error during lookup of Context Factory ",e);
+			return;
+		}
+		try {
+			log.info("Getting the connection factory.");
+			factory = (TopicConnectionFactory) ctx.lookup("Local_CF");
+		} catch (Exception e) {
+			log.error("Error during lookup of Queue Connection Factory ",e);
+			return;
+		}
+		try {
+			// http://www-01.ibm.com/support/knowledgecenter/SSKM8N_8.0.0/com.ibm.etools.mft.doc/aq20080_.htm
+			log.info("Getting the topic.");
+			topic = (Topic) ctx.lookup("StatisticsTopic");
+		} catch (Exception e) {
+			log.error("Error during lookup of topic",e);
+			return;
 		}
 
-		boolean hasMessages = true;
-		while (hasMessages) {
+		/***********************************************/
+		/* Create our objects, get selector from user. */
+		/***********************************************/
+		try {
+			connection = factory.createTopicConnection();
+			// create a server session pool
+			MQServerSessionPool ssPool = new MQServerSessionPool(connection);
+			connection.setExceptionListener(ssPool);
+			// create a topic connection consumer
+			ConnectionConsumer connConsumer = connection.createConnectionConsumer(topic, null, ssPool, 10);
+			log.info("Connecting to JMS Provider");
+			connection.start();
+
+			// wait for connection consumer
+			while (true) {
+				Thread.sleep(10000);
+			}
+
+		} catch (JMSException je) {
+			log.error("JMSException: ",je);
+			Exception le = je.getLinkedException();
+			if (le != null)
+				log.error("Linked exception: " + le);
+
+		} catch (Exception e) {
+			/*******************************************/
+			/* Catch and display exception information */
+			/*******************************************/
+			log.error("Exception: ",e);
+		} finally {
 			try {
-				message.clearMessage();
-				message.correlationId = CMQC.MQCI_NONE;
-				message.messageId = CMQC.MQMI_NONE;
-				q.get(message, gmo);
-				MQHeaderIterator it = new MQHeaderIterator(message);
-				it.skipHeaders();
-				byte[] content = new byte[message.getDataLength()];
-				message.readFully(content);
-				
-				WMQIStatisticsAccounting stat = (WMQIStatisticsAccounting) u.unmarshal(new ByteArrayInputStream(content));
-				double elapsedSeconds = stat.getMessageFlow().getTotalElapsedTime() / 1000000.0; // TotalElapsedTime
-																			// is
-																			// in
-																			// microseconds
-				double tps = 0;
-
-				if (stat.getMessageFlow().getTotalInputMessages() > 0) {
-					tps = stat.getMessageFlow().getTotalInputMessages() / elapsedSeconds;
-					
-					XMLGregorianCalendar eventDate = stat.getMessageFlow().getStartDate();
-					XMLGregorianCalendar eventTime = stat.getMessageFlow().getStartTime();
-					eventDate.setHour(eventTime.getHour());
-					eventDate.setMinute(eventTime.getMinute());
-					eventDate.setSecond(eventTime.getSecond());
-					sendMetrics(stat.getMessageFlow().getMessageFlowName(), tps, eventDate.toGregorianCalendar().getTimeInMillis());
-				}
-
-			} catch (MQException e) {
-				if (e.reasonCode == MQConstants.MQRC_NO_MSG_AVAILABLE) {
-					System.out.println("No more messages available!");
-					hasMessages = false;
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (MQDataException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (JAXBException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				if (connection != null)
+					connection.close();
+			} catch (JMSException e) {
+				log.error("Error while closing the connection",e);
 			}
 		}
-		try {
-			q.close();
-			qmgr.disconnect();
-		} catch (MQException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
+		log.info("Finished");
 
 	}
 
-	public static void sendMetrics(String metric, Double value, long timeStampInMillis) {
-		try (Socket socket = new Socket("localhost", 2003);
-				OutputStream s = socket.getOutputStream();) {
-
-			PrintWriter out = new PrintWriter(s, true);
-
-			out.printf("%s %f %d%n", metric, value, timeStampInMillis / 1000l);
-
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 }
