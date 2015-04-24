@@ -36,9 +36,21 @@ public class StatisticsTopicListener implements MessageListener {
 		if (message instanceof TextMessage) {
 			TextMessage tm = (TextMessage) message;
 			try {
+				
 				log.info("Got message");
 				WMQIStatisticsAccounting stat = (WMQIStatisticsAccounting) u.unmarshal(new StringReader(tm.getText()));
-				log.debug("Statistics for: " + stat.getMessageFlow().getMessageFlowName());
+				StringBuffer metric = new StringBuffer();
+				metric.append("com.ibm.iib.");
+				metric.append(stat.getMessageFlow().getBrokerLabel());
+				metric.append('.');
+				metric.append(stat.getMessageFlow().getExecutionGroupName());
+				metric.append('.');
+				metric.append(stat.getMessageFlow().getApplicationName());
+				metric.append('.');
+				metric.append(stat.getMessageFlow().getMessageFlowName());
+				metric.append('.');
+				metric.append("tps");
+				log.debug("Statistics for: " + metric);
 				double elapsedSeconds = stat.getMessageFlow().getTotalElapsedTime() / 1000000.0; // TotalElapsedTime
 				// is
 				// in
@@ -55,9 +67,7 @@ public class StatisticsTopicListener implements MessageListener {
 					eventDate.setHour(eventTime.getHour());
 					eventDate.setMinute(eventTime.getMinute());
 					eventDate.setSecond(eventTime.getSecond());
-					CarbonClient.sendMetrics(stat.getMessageFlow()
-							.getMessageFlowName(), tps, eventDate
-							.toGregorianCalendar().getTimeInMillis());
+					CarbonClient.sendMetrics(metric.toString(), tps, eventDate.toGregorianCalendar().getTimeInMillis());
 				}
 			} catch (JAXBException e) {
 				log.error("Error while parsing the message",e);
