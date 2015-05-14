@@ -2,14 +2,21 @@ package br.com.tsuru.iib.common.utils;
 
 import java.math.BigDecimal;
 
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import com.ibm.broker.plugin.MbConfigurationException;
 import com.ibm.broker.plugin.MbConversionException;
 import com.ibm.broker.plugin.MbDatabaseException;
 import com.ibm.broker.plugin.MbDate;
-import com.ibm.broker.plugin.MbElement;
 import com.ibm.broker.plugin.MbException;
 import com.ibm.broker.plugin.MbFatalException;
 import com.ibm.broker.plugin.MbMessage;
@@ -21,37 +28,56 @@ import com.ibm.broker.plugin.MbTime;
 public class ExceptionListParser {
 	
 	private static Logger log = LogManager.getLogger(ExceptionListParser.class);
+	private XPath xPath = XPathFactory.newInstance().newXPath();
  
+	/***
+	 * Generates a readable stack trace from ExceptionList tree
+	 * @param exceptionList
+	 * @return
+	 * @throws MbException
+	 */
 	public String getStackTrace(MbMessage exceptionList) throws MbException {
-        MbElement currException = exceptionList.getRootElement().getFirstChild();
-        StringBuffer sb = new StringBuffer();
-        while (currException != null && currException.getName().endsWith("Exception")) {
+		Document doc = exceptionList.getDOMDocument();
+        return getStackTrace((Element)doc.getDocumentElement().getLastChild());
+	}
+	/***
+	 * Generates a readable stack trace from ExceptionList DOM Root Element
+	 * @param exceptionList
+	 * @return
+	 * @throws MbException
+	 */
+	public String getStackTrace(Element currException) throws MbException {
+		StringBuffer sb = new StringBuffer();
+        while (currException != null && currException.getNodeName().endsWith("Exception")) {
                 MbException currMBE = convert2MbException(currException);
                 sb.append(currMBE.getMessage());
                 sb.append("\n");
-                // Processa o próximo nó de exceção
-                currException = currException.getLastChild();
+                currException = (Element) currException.getLastChild();
         }
         return sb.toString();
-}
+	}
+	
+	
+	
 	/***
 	 * Converts an Exception Node from a ExceptionList tree to a Java Exception
 	 * @param exceptionNode
 	 * @return exception object
 	 * @throws MbException
 	 */
-	private MbException convert2MbException(MbElement exceptionNode) {
+	private MbException convert2MbException(Element exceptionNode) {
 		MbException eRet = null;
 		String name;
 		try {
-			name = exceptionNode.getName();
+			
+			name = exceptionNode.getNodeName();
 
 			String source, methodName, messageSource, messageKey, traceText;
-			source 			= exceptionNode.getFirstElementByPath("File").getValueAsString();
-			methodName 		= exceptionNode.getFirstElementByPath("Function").getValueAsString();
-			messageSource 	= exceptionNode.getFirstElementByPath("Catalog").getValueAsString();
-			messageKey 		= exceptionNode.getFirstElementByPath("Number").getValueAsString();
-			traceText 		= exceptionNode.getFirstElementByPath("Text").getValueAsString();
+			source 			= (String) xPath.evaluate("File", exceptionNode,XPathConstants.STRING);
+			methodName 		= (String) xPath.evaluate("Function", exceptionNode,XPathConstants.STRING);
+			messageSource 	= (String) xPath.evaluate("Catalog", exceptionNode,XPathConstants.STRING);
+			messageKey 		= (String) xPath.evaluate("Number", exceptionNode,XPathConstants.STRING);
+			traceText 		= (String) xPath.evaluate("Text", exceptionNode,XPathConstants.STRING);
 			Object[] inserts = getInserts(exceptionNode);
 			if(name.equals("RecoverableException")) {
 				eRet = new MbRecoverableException(source, methodName, messageSource, messageKey, traceText, inserts);
@@ -60,9 +86,9 @@ public class ExceptionListParser {
 			} else if(name.equals("DatabaseException")) {
 				eRet = new MbDatabaseException(source, methodName, messageSource, messageKey, traceText, inserts);			
 			} else if(name.equals("ConversionException")) {
-				eRet = new MbConversionException(source, methodName, messageSource, messageKey, traceText, inserts);				
+				eRet = new MbConversionException(source, methodName, messageSource, messageKey, traceText, inserts);			
 			} else if(name.equals("ParserException")) {
-				eRet = new MbParserException(source, methodName, messageKey, messageSource, traceText, inserts);						
+				eRet = new MbParserException(source, methodName, messageKey, messageSource, traceText, inserts);			
 			} else if(name.equals("CastException")) {
 				eRet = new MbConversionException(source, methodName, messageSource, messageKey, traceText, inserts);			
 			} else if(name.equals("MessageException")) {
@@ -71,22 +97,25 @@ public class ExceptionListParser {
 			} else if(name.equals("SqlException")) {
 				eRet = new MbDatabaseException(source, methodName, messageSource, messageKey, traceText, inserts);		
 			} else if(name.equals("SocketException")) {
-				eRet = new MbRecoverableException(source, methodName, messageSource, messageKey, traceText, inserts);				
+				eRet = new MbRecoverableException(source, methodName, messageSource, messageKey, traceText, inserts);			
 			} else if(name.equals("SocketTimeoutException")) {
-				eRet = new MbRecoverableException(source, methodName, messageSource, messageKey, traceText, inserts);				
+				eRet = new MbRecoverableException(source, methodName, messageSource, messageKey, traceText, inserts);			
 			} else if(name.equals("UnknownException")) {
-				eRet = new MbRecoverableException(source, methodName, messageSource, messageKey, traceText, inserts);				
+				eRet = new MbRecoverableException(source, methodName, messageSource, messageKey, traceText, inserts);			
 			} else if(name.equals("FatalException")) {
 				eRet = new MbFatalException(source, methodName, messageSource, messageKey, traceText, inserts);				
 			} else if(name.equals("ConfigurationException")) {
-				eRet = new MbConfigurationException(source, methodName, messageSource, messageKey, traceText, inserts);				
+				eRet = new MbConfigurationException(source, methodName, messageSource, messageKey, traceText, inserts);			
 			} else if(name.equals("SecurityException")) {
-				eRet = new MbSecurityException(source, methodName, messageSource, messageKey, traceText, inserts);				
+				eRet = new MbSecurityException(source, methodName, messageSource, messageKey, traceText, inserts);			
 			} else {
 				throw new AssertionError("see http://publib.boulder.ibm.com/infocenter/wmbhelp/v8r0m0/topic/com.ibm.etools.mft.doc/ac00490_.htm");
 			}
 		} catch (MbException e) {
 			log.error("Cannot convert exception node to a java exception object!",e);
+		} catch (XPathExpressionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return eRet;
 	}
@@ -96,16 +125,18 @@ public class ExceptionListParser {
 	 * @param exceptionNode
 	 * @return
 	 * @throws MbException
+	 * @throws XPathExpressionException 
 	 */
-	private Object[] getInserts(MbElement exceptionNode) throws MbException {
+	private Object[] getInserts(Element exceptionNode) throws MbException, XPathExpressionException {
 		Object[] oRet = null;
-		MbElement[] inserts = (MbElement[]) exceptionNode.evaluateXPath("Insert");
-		if(inserts != null && inserts.length > 0) {
-			oRet = new Object[inserts.length];
+		NodeList inserts = (NodeList) xPath.evaluate("Insert", exceptionNode,XPathConstants.NODESET);
+		if(inserts != null && inserts.getLength() > 0) {
+			oRet = new Object[inserts.getLength()];
 			int index = 0;
-			for (MbElement insert : inserts) {
-				int type = Integer.parseInt(insert.getFirstElementByPath("Type").getValueAsString());
-				String value = insert.getFirstElementByPath("Text").getValueAsString();
+			while( index < inserts.getLength() ) {
+				Element insert = (Element) inserts.item(index);
+				int type = Integer.parseInt((String) xPath.evaluate("Type", insert,XPathConstants.STRING));
+				String value = (String) xPath.evaluate("Text", exceptionNode,XPathConstants.STRING);
 				switch (type) {
 //				The data type of the value:
 //					0 = Unknown 
@@ -181,7 +212,7 @@ public class ExceptionListParser {
 		} else {
 			// put just node label in the array 
 			oRet = new Object[1];
-			oRet[0] = exceptionNode.getFirstElementByPath("Label").getValueAsString();
+			oRet[0] = (String) xPath.evaluate("Label", exceptionNode,XPathConstants.STRING);
 		}
 		return oRet;
 	}
