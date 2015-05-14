@@ -1,0 +1,18 @@
+<project default="generateClasses">	
+	<target name="generateClasses" description="....">
+	    <exec executable="${java.home}/../bin/xjc">
+	        <arg value="-d"/>
+	        <arg value="${basedir}"/>
+	        <arg value="-p"/>
+	        <arg value="com.scalait.monitor.status.jaxb"/>
+	        <arg value="${basedir}/../IIBTransactionMonitor-app/brokerstatus.xsd"/>
+	    </exec>
+	    <exec executable="${java.home}/../bin/xjc">
+	        <arg value="-d"/>
+	        <arg value="${basedir}"/>
+	        <arg value="-p"/>
+	        <arg value="com.ibm.wmb.monitor.jaxb"/>
+	        <arg value="${basedir}/../IIBTransactionMonitor-app/IBMdefined/WMBEvent.xsd"/>
+	    </exec>
+	</target>
+</project>

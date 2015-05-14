@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?><xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://www.ibm.com/xmlns/prod/websphere/messagebroker/6.1.0/monitoring/event" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:wmb="http://www.ibm.com/xmlns/prod/websphere/messagebroker/6.1.0/monitoring/event">
+
+    <!-- The monitoring event -->
+    <xsd:element name="event" type="wmb:Event">
+    </xsd:element>
+    
+    <!-- Complex type for event element -->
+    <xsd:complexType name="Event">
+        <xsd:sequence>
+            <!-- eventPointData contains key information about the event -->
+            <xsd:element maxOccurs="1" minOccurs="1" name="eventPointData" type="wmb:EventPointData"/>
+            <!-- applicationData contains fields in the message payload which have been added to the event for use by a monitoring application -->
+            <xsd:element maxOccurs="1" minOccurs="0" name="applicationData" type="wmb:ApplicationData"/>
+            <!-- bitstreamData contains an encoded representation of the message bitstream -->
+            <xsd:element maxOccurs="1" minOccurs="0" name="bitstreamData" type="wmb:BitstreamData"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Complex type for eventPointData element -->
+    <xsd:complexType name="EventPointData">
+        <xsd:sequence>
+            <xsd:element maxOccurs="1" minOccurs="1" name="eventData">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element maxOccurs="1" minOccurs="1" name="eventIdentity">
+                            <xsd:complexType>
+                                <!-- Monitoring profile override : eventPointDataQuery/eventIdentity/@eventName -->
+                                <xsd:attribute name="eventName" type="string" use="required"/>
+
+                                <!-- Reserved for future use -->
+                                <xsd:attribute name="severity" type="string" use="optional"/>
+                                <!-- Reserved for future use -->
+                                <xsd:attribute name="priority" type="string" use="optional"/>
+                                <!-- Reserved for future use -->
+                                <xsd:attribute name="successDisposition" type="string" use="optional"/>
+                            </xsd:complexType>
+                        </xsd:element>
+
+                        <!-- Used for sequencing of events. Creation time is always set. -->
+                        <xsd:element maxOccurs="1" minOccurs="1" name="eventSequence">
+                            <xsd:complexType>
+                                <!-- The creation time of the event -->
+                                <xsd:attribute name="creationTime" type="dateTime" use="required"/>
+
+                                <!-- Incrementing sequence number -->
+                                <!-- Starts at 1 for the first event from an invocation of a message flow -->
+                                <!-- Incremented for each subsequent event from the same invocation of the flow --> 
+                                <xsd:attribute name="counter" type="integer" use="optional"/>
+
+                                <!-- These three attributes exists for compatibility with 6.1.0.2 only, not used in 6.1.0.3 onwards -->
+                                <xsd:attribute name="value" type="anySimpleType" use="optional"/>
+                                <xsd:attribute name="name" type="string" use="optional"/>
+                                <xsd:attribute name="dataType" type="wmb:sequenceDataType" use="optional"/>
+                            </xsd:complexType>
+                        </xsd:element>
+                        
+                        <xsd:element maxOccurs="1" minOccurs="1" name="eventCorrelation">
+                            <xsd:complexType>
+                                <!-- The correlator of the local transaction (i.e. message flow) -->
+                                <!-- Monitoring profile override : eventPointDataQuery/eventCorrelation/localTransactionId -->
+                                <xsd:attribute name="localTransactionId" type="string" use="required"/>
+                                <!-- The correlator of any parent transaction in which this local transaction participates -->
+                                <!-- Monitoring profile override : eventPointDataQuery/eventCorrelation/parentTransactionId -->
+                                <xsd:attribute name="parentTransactionId" type="string" use="optional"/>
+                                <!-- The correlator of any global transaction in which this local transaction participates --> 
+                                <!-- Monitoring profile override : eventPointDataQuery/eventCorrelation/globalTransactionId -->
+                                <xsd:attribute name="globalTransactionId" type="string" use="optional"/>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+
+                    <!-- Version of WMB which emitted the event, e.g. 6.1.0.3 -->
+                    <xsd:attribute name="productVersion" type="string" use="required"/>
+                    <!-- Version of the event schema, e.g. 6.1.0.3 -->
+                    <xsd:attribute name="eventSchemaVersion" type="string" use="required"/>
+                    <!-- Event source. This is only marked optional for 6.1.0.2 compatibility. -->
+                    <!-- Monitoring profile override : eventSource/@eventSourceAddress -->
+                    <xsd:attribute name="eventSourceAddress" type="string" use="optional"/>
+
+                </xsd:complexType>
+            </xsd:element>
+
+            <!-- Contents of messageFlowData are populated by message broker, and cannot be overridden via the monitoring profile -->
+            <xsd:element name="messageFlowData">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element maxOccurs="1" minOccurs="1" name="broker">
+                            <xsd:complexType>
+                                <xsd:attribute name="name" type="string" use="required"/>
+                                <xsd:attribute name="UUID" type="string" use="optional"/>
+                                <!-- Reserved for future use -->
+                                <xsd:attribute name="hostName" type="string" use="optional"/>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element maxOccurs="1" minOccurs="1" name="executionGroup">
+                            <xsd:complexType>
+                                <xsd:attribute name="name" type="string" use="required"/>
+                                <xsd:attribute name="UUID" type="string" use="optional"/>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element maxOccurs="1" minOccurs="1" name="messageFlow">
+                            <xsd:complexType>
+                                <xsd:attribute name="name" type="string" use="required"/>
+                                <xsd:attribute name="UUID" type="string" use="optional"/>
+                                <xsd:attribute name="threadId" type="string" use="required"/>
+                                <!-- Contains the fully-qualified name of the message flow, which is guaranteed to be unique across brokers. -->
+                                <!-- The value takes the form: <BrokerName>.<ExecutionGroupName.<MessageFlowName> -->
+                                <xsd:attribute name="uniqueFlowName" type="string" use="required"/>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element maxOccurs="1" minOccurs="1" name="node">
+                            <xsd:complexType>
+                                <!-- The label assigned to the node by the user  -->
+                                <xsd:attribute name="nodeLabel" type="string" use="required"/>
+                                <!-- The IBM name of the node -->
+                                <xsd:attribute name="nodeType" type="string" use="required"/>
+                                <!-- Terminal event only: The identifier of the terminal which emitted the event. -->
+                                <xsd:attribute name="terminal" type="string" use="optional"/>
+                                <!-- Any other detail about the node that might be useful -->
+                                <!-- 6.1.0.3: Only set for MQInput node, where it contains queue name --> 
+                                <xsd:attribute name="detail" type="string" use="optional"/>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Complex type for applicationData element -->
+    <xsd:complexType name="ApplicationData">
+        <xsd:sequence>
+            <!-- Simple fields extracted from the message payload -->
+            <!-- Each occurrence of simpleContent is populated by an occurrence of applicationDataQuery/simpleContent in the monitoring profile -->
+            <!-- Monitoring profile override : applicationDataQuery/simpleContent -->
+            <xsd:element maxOccurs="unbounded" minOccurs="0" name="simpleContent">
+                <xsd:complexType>
+                    <xsd:attribute name="name" type="string" use="required"/>
+                    <xsd:attribute name="value" type="anySimpleType" use="required"/>
+                    <xsd:attribute name="targetNamespace" type="string" use="optional"/>
+                    <xsd:attribute name="dataType" type="wmb:simpleContentDataType" use="required"/>
+                </xsd:complexType>
+            </xsd:element>
+
+            <!-- Complex schema-defined content fields extracted from the message payload -->
+            <!-- Monitoring profile override : applicationDataQuery/complexContent -->
+            <xsd:element maxOccurs="unbounded" minOccurs="0" name="complexContent">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:any maxOccurs="1" minOccurs="1" processContents="skip"/>
+                    </xsd:sequence>
+                    <xsd:attribute name="elementName" type="string" use="required"/>
+                    <xsd:attribute name="targetNamespace" type="string" use="optional"/>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Complex type for bistreamData element -->
+    <xsd:complexType name="BitstreamData">
+        <xsd:sequence>
+            <!-- Monitoring profile override : bitstreamDataQuery/@bitstreamContent -->
+            <xsd:element minOccurs="1" name="bitstream">
+                <xsd:complexType>
+                    <xsd:simpleContent>
+                        <xsd:extension base="string"> 
+                            <!-- Monitoring profile override : bitstreamDataQuery/@encoding -->
+                            <xsd:attribute name="encoding" type="wmb:encodingType"/>
+                            </xsd:extension>
+                    </xsd:simpleContent>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Simple type for bistream encoding -->
+    <xsd:simpleType name="encodingType">
+        <xsd:restriction base="string">
+            <xsd:enumeration value="none"/>
+            <xsd:enumeration value="CDATA"/>
+            <xsd:enumeration value="hexBinary"/>
+            <xsd:enumeration value="base64Binary"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- Simple type for sequence data type -->
+    <!-- Not used from 6.1.0.3 onwards -->
+    <xsd:simpleType name="sequenceDataType">
+        <xsd:restriction base="string">
+            <xsd:enumeration value="dateTime"/>
+            <xsd:enumeration value="integer"/>
+            <xsd:enumeration value="string"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- Simple type for simple content data type -->
+    <xsd:simpleType name="simpleContentDataType">
+        <xsd:restriction base="string">
+            <xsd:enumeration value="boolean"/>
+            <xsd:enumeration value="date"/>
+            <xsd:enumeration value="dateTime"/>
+            <xsd:enumeration value="decimal"/>
+            <xsd:enumeration value="duration"/>
+            <xsd:enumeration value="integer"/>
+            <xsd:enumeration value="string"/>
+            <xsd:enumeration value="time"/>
+            <xsd:enumeration value="hexBinary"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:schema>

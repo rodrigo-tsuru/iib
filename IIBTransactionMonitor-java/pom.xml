@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.scalait.iib</groupId>
+	<artifactId>TransactionMonitor</artifactId>
+
+	<packaging>jar</packaging>
+
+	<!-- add here the project dependencies -->
+	<dependencies>
+		<dependency>
+			<groupId>com.ibm.etools.mft.jcn</groupId>
+			<artifactId>javacompute</artifactId>
+			<version>9.0.200</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.ibm.etools.mft.jcn</groupId>
+			<artifactId>jplugin2</artifactId>
+			<version>9.0.200</version>
+			<scope>provided</scope>
+		</dependency>
+  		<dependency>
+    			<groupId>org.apache.logging.log4j</groupId>
+    			<artifactId>log4j-api</artifactId>
+    			<version>2.2</version>
+  		</dependency>
+  		<dependency>
+    			<groupId>org.apache.logging.log4j</groupId>
+    			<artifactId>log4j-core</artifactId>
+    			<version>2.2</version>
+  		</dependency>
+  		<dependency>
+  			<groupId>br.com.tsuru.iib</groupId>
+  			<artifactId>common.utils</artifactId>
+  			<version>0.0.1-SNAPSHOT</version>
+  		</dependency>
+	</dependencies>
+
+	<version>1.0-SNAPSHOT</version>
+</project>

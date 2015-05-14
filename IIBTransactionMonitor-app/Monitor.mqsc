@@ -1,0 +1,36 @@
+DEFINE QLOCAL ('ESB.MONITORIA.REQ') +
+       DESCR('Fila de recepcao dos eventos de monitoracao') +
+       MAXDEPTH(999999999) +
+       BOQNAME('ESB.MONITORIA.ERR') +
+       REPLACE
+	   
+DEFINE QLOCAL ('ESB.MONITORIA.ERR') +
+       DESCR('Fila de falha para eventos de monitoracao nao persistidos') +
+       MAXDEPTH(999999999) +
+       REPLACE
+	   
+DEFINE TOPIC ('TopicoMonitoria') +
+       TOPICSTR('$SYS/Broker/+/Monitoring/#') +
+       DESCR('Topico de eventos de monitoracao dos fluxos') +
+       CLUSTER(' ') +
+       DEFPRTY(ASPARENT) +
+       DEFPSIST(ASPARENT) +
+       DEFPRESP(ASPARENT) +
+       MDURMDL(' ') +
+       DURSUB(ASPARENT) +
+       PUB(ASPARENT) +
+       SUB(ASPARENT) +
+       MNDURMDL(' ') +
+       NPMSGDLV(ASPARENT) +
+       PMSGDLV(ASPARENT) +
+       PROXYSUB(FIRSTUSE) +
+       PUBSCOPE(ASPARENT) +
+       SUBSCOPE(ASPARENT) +
+       WILDCARD(PASSTHRU) +
+       REPLACE
+	   
+DEFINE SUB ('Monitoria_Assinatura') +
+       DESTQMGR(' ') +
+       DEST('ESB.MONITORIA.REQ') +
+       TOPICOBJ('TopicoMonitoria') +
+       REPLACE

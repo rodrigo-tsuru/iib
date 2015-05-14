@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:element name="status" type="_status"></xsd:element>
+
+	<xsd:complexType name="_status">
+		<xsd:sequence>
+			<xsd:element name="brokers" type="_brokers"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="_brokers">
+		<xsd:sequence>
+			<xsd:element name="broker" type="_broker" maxOccurs="unbounded"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="_broker">
+		<xsd:sequence>
+			<xsd:element name="isRunning" type="xsd:boolean"></xsd:element>
+			<xsd:element name="egs" type="_egs"></xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string"/>
+	</xsd:complexType>
+	<xsd:complexType name="_egs">
+		<xsd:sequence>
+			<xsd:element name="eg" type="_eg" maxOccurs="unbounded"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="_eg">
+		<xsd:sequence>
+			<xsd:element name="isRunning" type="xsd:boolean"></xsd:element>
+			<xsd:element name="HTTPport" type="xsd:int"></xsd:element>
+			<xsd:element name="HTTPSport" type="xsd:int"></xsd:element>
+			<xsd:element name="apps" type="_apps"></xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string"/>
+	</xsd:complexType>
+	<xsd:complexType name="_apps">
+		<xsd:sequence>
+			<xsd:element name="app" type="_app" maxOccurs="unbounded"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="_app">
+		<xsd:sequence>
+			<xsd:element name="bar" type="xsd:string"></xsd:element>
+			<xsd:element name="deployTime" type="xsd:dateTime"></xsd:element>
+			<xsd:element name="isRunning" type="xsd:boolean"></xsd:element>
+			<xsd:element name="flows" type="_flows"></xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string"/>
+	</xsd:complexType>
+	
+	<xsd:complexType name="_flows">
+		<xsd:sequence>
+			<xsd:element name="flow" type="_flow" maxOccurs="unbounded"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="_flow">
+		<xsd:sequence>
+			<xsd:element name="isRunning" type="xsd:boolean"></xsd:element>
+			<xsd:element name="threads" type="xsd:int"></xsd:element>
+			<xsd:element name="isMonitored" type="xsd:boolean"></xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string"/>
+	</xsd:complexType>
+	
+</xsd:schema>
