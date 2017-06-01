@@ -43,30 +43,6 @@ public class GenerateWASPlugin {
 
 	private static Logger log = LogManager.getLogger(GenerateWASPlugin.class);
 
-	public static void main(String[] args) {
-		GenerateWASPlugin app = new GenerateWASPlugin();
-		BrokerProxy bp = app.connect("192.168.1.26", 4414);
-
-		if (bp != null) {
-
-			String[] memberhostNames = { "esbsrv01","esbsrv02" };
-
-			Map<BrokerProxy, String[]> brokerHostMap = new HashMap<BrokerProxy, String[]>();
-
-			brokerHostMap.put(bp, memberhostNames);
-
-			try {
-				String pluginCfgXml = BrokerProxy.generateWASPlugin(
-						brokerHostMap, DEFAULT_TIMEOUT);
-
-				log.info(pluginCfgXml);
-			} catch (ConfigManagerProxyLoggedException e) {
-				log.error("Plugin generation error!",e);
-			}
-			
-			bp.disconnect();
-		}
-	}
 
 	/**
 	 * Connects, using the parameters to the web administration port on which an
@@ -80,7 +56,7 @@ public class GenerateWASPlugin {
 	 * @return BrokerProxy connected instance. If the connection could not be
 	 *         established, null is returned.
 	 */
-	private BrokerProxy connect(String brokerHost, int brokerPort) {
+	public BrokerProxy connect(String brokerHost, int brokerPort) {
 		BrokerProxy b = null;
 
 		String brokerHostName = brokerHost;
@@ -133,7 +109,7 @@ public class GenerateWASPlugin {
 	 * @return BrokerProxy connected instance. If the connection could not be
 	 *         established, null is returned.
 	 */
-	private BrokerProxy connect(String localBrokerName) {
+	public BrokerProxy connect(String localBrokerName) {
 		BrokerProxy b = null;
 
 		String brokerName = localBrokerName;
