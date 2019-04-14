@@ -1,0 +1,120 @@
+<project name="Global2EmbeddedListener" default="change" basedir=".">
+  <description>
+    Makes SOAPInput and HTTPInput nodes listen to embedded EG HTTP listener
+  </description>
+  <!-- set global properties for this build -->
+  <property environment="env"/>
+  
+  <loadproperties srcFile="egPorts.properties" prefix="eg."/>
+  
+  <target name="init">
+  <taskdef resource="net/sf/antcontrib/antlib.xml"/>
+    <!-- Create the time stamp -->
+    <tstamp/>
+	
+	<fail unless="env.MQSI_WORKPATH" message="Rode o arquivo mqsiprofile antes de rodar este script"/>
+	<fail unless="env.GMUD" message="O numero da GMUD (variavel de ambiente GMUD) nao foi informado!"/>
+
+  </target>
+
+  <target name="change" depends="init"
+        description="change http listeners">
+    <!-- Create the distribution directory -->
+	<exec executable="mqsilist" outputproperty="mqsilistoutput" newenvironment="false"></exec>
+    <for param="line" list="${mqsilistoutput}" delimiter="${line.separator}">
+		
+      <sequential>
+		<if>
+		 <matches string="@{line}" pattern="BIP128*"/>
+		  <then>
+			  <var name="BROKER" unset="true"/>
+			  <propertyregex property="BROKER"
+			  input="@{line}"
+			  regexp="BIP.*\'([^\.]*)\'.*\'([^\.]*)\'.*"
+			  select="\1" />
+			  <echo message="Encontrado broker ${BROKER}"/>
+			  <exec executable="mqsilist" outputproperty="mqsilistoutput2" newenvironment="false">
+				<arg value="${BROKER}" />
+			  </exec>
+			 <for param="line2" list="${mqsilistoutput2}" delimiter="${line.separator}">
+				<sequential>
+				  <if> 
+					 <matches string="@{line2}" pattern="BIP128*"/>
+						  <then>
+							  
+							  <var name="EG" unset="true"/>
+							  <var name="PORT" unset="true"/>
+							  <propertyregex property="EG"
+							  input="@{line2}"
+							  regexp="BIP.*\'([^\.]*)\'.*\'([^\.]*)\'.*"
+							  select="\1" />
+							  
+								<if>
+									<isset property="eg.${EG}" />
+									<then>
+										
+										<propertycopy name="PORT" from="eg.${EG}"/>
+										<echo message="Alterando listener do EG ${EG} para a porta ${PORT}" />
+										
+										<exec executable="mqsichangeproperties" newenvironment="false" failonerror="true">
+											  <arg value="${BROKER}" />
+											  <arg value="-e" /> 
+											  <arg value="${EG}" />
+											  <arg value="-o" />
+											  <arg value="HTTPConnector" />
+											  <arg value="-n" />
+											  <arg value="explicitlySetPortNumber" />
+											  <arg value="-v" />
+											  <arg value="${PORT}" />
+										  </exec>
+										
+										<exec executable="mqsichangeproperties" newenvironment="false" failonerror="true">
+											  <arg value="${BROKER}" />
+											  <arg value="-e" /> 
+											  <arg value="${EG}" />
+											  <arg value="-o" />
+											  <arg value="ExecutionGroup" />
+											  <arg value="-n" />
+											  <arg value="httpNodesUseEmbeddedListener" />
+											  <arg value="-v" />
+											  <arg value="true" />
+										  </exec>
+										<exec executable="mqsichangeproperties" newenvironment="false" failonerror="true">
+											  <arg value="${BROKER}" />
+											  <arg value="-e" /> 
+											  <arg value="${EG}" />
+											  <arg value="-o" />
+											  <arg value="ExecutionGroup" />
+											  <arg value="-n" />
+											  <arg value="soapNodesUseEmbeddedListener" />
+											  <arg value="-v" />
+											  <arg value="true" />
+										  </exec>
+									</then>
+									<else>
+										<echo message="EG ${EG} nao será modificado, pois não está no properties" />
+									</else>
+								</if>
+							    
+							
+						  </then>
+					  </if>
+					 </sequential>
+				</for>
+		      
+		  </then>
+		  
+		 </if>
+        
+      </sequential>
+	</for>
+ 
+
+  </target>
+   <target name="echoprops">
+    <script language="beanshell">
+        System.out.println("All Properties: " + project.getProperties().keySet());
+    </script>
+ </target>
+
+</project>

@@ -1,0 +1,50 @@
+<project name="BackupBrokers" default="backup" basedir=".">
+  <description>
+    Backups all brokers of this machine
+  </description>
+  <!-- set global properties for this build -->
+  <property environment="env"/>
+  <property name="BACKUP_DIR" location="E:\Backups" />
+  
+  <target name="init">
+  <taskdef resource="net/sf/antcontrib/antlib.xml"/>
+    <!-- Create the time stamp -->
+    <tstamp/>
+	
+	<fail unless="env.MQSI_WORKPATH" message="Rode o arquivo mqsiprofile antes de rodar este script"/>
+	<fail unless="env.GMUD" message="O numero da GMUD (variavel de ambiente GMUD) nao foi informado!"/>
+
+    <mkdir dir="${BACKUP_DIR}"/>
+	<mkdir dir="${BACKUP_DIR}/GMUD_${env.GMUD}"/>
+  </target>
+
+  <target name="backup" depends="init"
+        description="backups all brokers">
+    <!-- Create the distribution directory -->
+	<exec executable="mqsilist" outputproperty="mqsilistoutput" newenvironment="false"></exec>
+    <for param="line" list="${mqsilistoutput}" delimiter="${line.separator}">
+		
+      <sequential>
+		<if>
+		 <matches string="@{line}" pattern="BIP128*"/>
+		  <then>
+			  <propertyregex property="BROKER"
+			  input="@{line}"
+			  regexp="BIP.*\'([^\.]*)\'.*\'([^\.]*)\'.*"
+			  select="\1" />
+		      <exec executable="mqsibackupbroker.bat" newenvironment="false">
+				  <arg value="${BROKER}" />
+				  <arg value="-d" /> 
+				  <arg value="${BACKUP_DIR}/GMUD_${env.GMUD}" />
+			  </exec>
+		  </then>
+		  
+		 </if>
+        
+      </sequential>
+	</for>
+ 
+
+  </target>
+
+</project>
